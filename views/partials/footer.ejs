@@ -1,0 +1,27 @@
+<!-- views/partials/footer.ejs -->
+<div class="d-flex flex-row" id="skiptranslate">
+	<div id="google_translate_element"></div>
+
+	<script type="text/javascript">
+	function googleTranslateElementInit() {
+	new google.translate.TranslateElement({pageLanguage: 'en'}, 'google_translate_element');
+	}
+	
+	// if(window.Notification)
+	// {
+	// 	Notification.requestPermission().then(function(p) {
+	// 		if(p === 'granted') {
+	// 			// show notification here
+	// 		}
+	// 	}).catch(function(err) {
+	// 		// console.error(err);
+	// 	});
+	// }
+
+	</script>
+
+	<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+	<div class="ml-auto">
+		<p class="text-center text-muted">© Copyright 2019 jwolf</p>
+	</div>
+</div>

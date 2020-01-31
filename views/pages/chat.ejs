@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<% include ../partials/head %>
+	</head>
+	<body class="container">
+		
+		<header>
+			<% include ../partials/header %>
+		</header>
+		<!-- console.log(matches) -->
+		<main>            
+			<div class="container page rounded-bottom">
+				<div class="messaging">
+					<div class="inbox_msg">
+						<div class="inbox_people">
+							<div class="headind_srch">
+								<div class="recent_heading">
+								<h4>Your Matches</h4>
+								</div>
+							</div>
+							<div class="inbox_chat">
+								<% matches.forEach(person => {
+									%><div name='clickme' class="chat_list" onclick="initChat('<%= user._id %>', '<%= person._id %>', this)">
+										<div id ="" class="chat_people">
+											<div class="chat_img"> <img src="<%= person.Prof%>" alt="profile pic"></div>
+											<div class="chat_ib">
+												<h5><%= person.username%> <span class="chat_date"></span></h5> <!-- TODO: stuff-->
+											</div>
+										</div>
+									</div><%
+								}) %>
+							</div>
+						</div>
+						<div class="mesgs">
+						<div class="msg_history" id="msg_history">
+							<div style="text-align: center"><p><-- Please choose a chat on the left!</p></div>
+						</div>
+						<div class="type_msg" id="type_msg" style="display: none;">
+							<div class="input_msg_write">
+							<input id="messagetosend" class="write_msg" placeholder="Type a message" />
+							<button id="send-button" class="msg_send_btn" type="submit">send!</button>
+							</div>
+						</div>
+						</div>
+					</div>
+					</div>
+			</div>
+
+		</main>
+
+<footer>
+	<% include ../partials/footer %>
+</footer>
+<!-- This shit must go somewhere. Julian help -->
+<script src="/socket.io/socket.io.js"></script>
+<script>
+	var socket = io();//opening sockets
+	var u1, u2
+	var roomname
+	function datestuffrename(newTime){
+			var currentDate = new Date();
+			var messageDate = new Date(newTime)
+            var time = messageDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+			var date = messageDate.getDate();
+			var month = messageDate.getMonth(); 
+            var year = messageDate.getFullYear();
+            
+            if (date == currentDate.getDate() && month == currentDate.getMonth() && year == currentDate.getFullYear()){
+                return ('Today @ ' + time);
+            }else{
+                return ((month+1) + "/" + date + "/" + year + ' @ ' + time);
+            }
+		}
+
+		function joinedChat(joiner)
+		{
+			var blockthing = document.createElement('div');
+			var container = document.getElementById('msg_history');
+			blockthing.innerHTML = '<div class="incoming_msg">'+
+										'<div class="joinedMessage">'+
+											joiner + ' has joined the chat, you are no longer lonely :)'
+											// '<p>'+ msg.text +'</p>'+
+											// '<span class="time_date">'+ datestuffrename(msg.date) +'</span>' +
+										'</div>'+
+								'</div>';
+			container.appendChild(blockthing)
+		$('#msg_history')[0].scrollTop = $('#msg_history')[0].scrollHeight
+		}
+
+	function showMessage(msg)
+	{
+        var blockthing = document.createElement('div');
+        var container = document.getElementById('msg_history');
+        var loggedUser =  '<%= user._id %>';
+        if(msg.sender == loggedUser){
+            blockthing.innerHTML = '<div class="outgoing_msg">'+
+                                            '<div class="sent_msg">'+
+                                                '<p>'+ msg.text +'</p>'+
+                                                '<span class="time_date">'+ datestuffrename(msg.date) +'</span>' +
+                                            '</div>'+
+                                    '</div>';
+            container.appendChild(blockthing);
+        }else{
+            blockthing.innerHTML = '<div class="incoming_msg">'+
+                                        '<div class="received_msg">'+
+                                            '<div class="received_withd_msg">'+
+                                            '<p>'+ msg.text +'</p>'+
+                                            '<span class="time_date">'+ datestuffrename(msg.date) +'</span></div>'+
+                                        '</div>'+
+                                    '</div>';
+    
+            container.appendChild(blockthing);
+        }
+		$('#msg_history')[0].scrollTop = $('#msg_history')[0].scrollHeight
+	}
+	function initChat(id1, id2, me)
+	{
+		u1 = id1
+		u2 = id2
+        $('#msg_history').empty()
+		$.get('/messages').done(() => {})
+		try
+		{
+			socket.emit('init', {id1: id1, id2: id2})
+		}catch(err){}
+        
+        document.getElementsByName('clickme').forEach(elem => {
+                elem.setAttribute('class', 'chat_list')
+        })
+		me.setAttribute('class', 'chat_list active_chat')
+		var container = document.getElementById('type_msg');
+		$("#type_msg").show();
+	}
+	$(function () {
+		socket.on('joined', result => {
+                $('#msg_history').empty()
+				roomname = result.roomName
+				result.history.forEach(message => {
+					showMessage(message)
+				})
+				if (result.person != '<%= user.username %>')
+					joinedChat(result.person)
+		})
+		//send message
+		$('#messagetosend').keypress((e) => {
+			if (e.which == 13){
+				e.preventDefault()
+				sendmessage()
+			}
+		})
+		$('#send-button').click(function(e){
+			e.preventDefault(); // prevents page reloading
+			sendmessage()
+			return false;
+		});
+		function sendmessage(){
+			socket.emit('chat message', roomname, '<%=user._id%>',$('#messagetosend').val());
+			$('#messagetosend').val('');
+		}
+		//receiving messages
+		socket.on('chat message', function(msg){
+			showMessage(msg)
+		});
+	});
+	</script>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!-- views/pages/index.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<% include ../partials/head %>
+	</head>
+	<body class="container">
+		
+		<header>
+			<% include ../partials/header %>
+		</header>
+		<script>
+			var availableTags = []
+			$(document).ready(() => {
+				$('#tags').keypress((e) => {
+					if (e.which == 13) {
+						e.preventDefault()
+						var tag = $('#tags').val();
+						$('#tags').val('');
+						$('#tags').text('');
+						if (tag)
+							$('#likes-list').append('<input type="text" id="inputTag" value="'+tag+'" class="tag-button" name="tags">');
+				}});
+				$('#filterSubmit').click(() => {
+					$('#filterForm').submit()
+				})
+				$('#inputTag').click(() => {
+					
+				})
+				$('#inputTag').keypress((e) => { e.preventDefault(); return false; })
+			})
+			setInterval(function(){
+				$.get('/tags/get').done(result => {
+					(result).forEach(element => {
+						if (availableTags.indexOf(element['Tag']) === -1)
+							availableTags.push(element['Tag']);
+						$('#tags').autocomplete({
+							source: availableTags
+						})
+					});
+				})
+			}, 10000);
+		</script>
+		<main>
+			<div class="container page">
+				<hr>
+				<% if (setup === false) {
+					%>
+					<h1>Please setup account before you can search for users</h1>
+					<a class="nav-link" href="/profile">Profile</a>
+					<%
+					}else
+					{
+						%>
+						<div class="container w-auto">
+							<form id='filterForm' method="GET" action="/filter">
+								<div class="form-group">
+									<input type="number" style="background-color: white; color: black;" placeholder="MinAge" name="minAge">
+								</div>
+								<div class="form-group">
+									<input type="number" style="background-color: white; color: black;" placeholder="MaxAge" name="maxAge">
+								</div>
+								<div class="form-group">
+									<input type="number" style="background-color: white; color: black;" placeholder="Distance" name="distance">
+								</div>
+								<div class="form-group ui-widgets w-100 row">
+									<input style="background-color: white; color: black;" placeholder="Likes" type="text" id="tags" class="w-75">
+								</div>
+								<hr>
+								<div class="grid">
+									<div id='likes-list' class="mx-auto">
+									</div>
+								</div>
+								<hr>
+								<input id="filterSubmit" type="submit" value="Filter" style="background-color: black; color: white;" name="submit">
+							</form>
+							<hr>
+						</div>
+						<%
+					}
+					if (users.length == 1)
+					{
+						%>
+							<h1>You currently don't have any matches based on your search paramaters available</h1>
+						<%
+					}
+					else
+					{ %>
+						<div class="w-100">
+							<!--Cards-->
+							<%
+								var blocklist = user.blocks;
+								for (var i = 0; i < blocklist.length; i++)
+								{
+									blocklist[i] = blocklist[i].toString();
+								}
+								for (var i = 0; i < users.length; i++) {
+									var u = users[i];
+									if (u['username'] === null || u['firstname'] === null || u['lastname'] === null || u['Prof'] !== null)
+									{
+									var date = new Date();
+									var mydate = new Date(users[i]['age']);
+									var myAge = date.getFullYear() - mydate.getFullYear();
+									if (myAge > 17)
+									{
+										if (users[i]['_id'].toString() != user['_id'].toString())
+										{
+											var bid = users[i]['_id'];
+											bid = bid.toString();
+											if (blocklist.indexOf(bid) === -1) {
+												var R = 6371; // Radius of the earth in km
+												var dLat = (users[i].location[0]-user.location[0]) * (Math.PI/180);  // deg2rad below
+												var dLon = (users[i].location[1]-user.location[1]) * (Math.PI/180); 
+												var a = 
+												Math.sin(dLat/2) * Math.sin(dLat/2) +
+												Math.cos((user.location[0]) * (Math.PI/180)) * Math.cos((users[i].location[0]) * (Math.PI/180)) * 
+												Math.sin(dLon/2) * Math.sin(dLon/2)
+												; 
+												var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+												var d = R * c; // Distance in km 
+												//Calculate mTags
+													var rate = 0;
+													for(var k = 0; k < user['Tag'].length; k++) {
+														for (var j = 0; j < users[i]['Tag'].length; j++) {
+															if (user['Tag'][k] == users[i]['Tag'][j]) {
+																rate++;
+																break;
+															}
+														}
+													}
+												//Calculate max match
+												var Total = (user['Tag'].length > users[i]['Tag'].length ? users[i]['Tag'].length : user['Tag'].length);
+												if (Total === 0)
+													Total = 1;
+												//%%%%%
+												var percent = (rate / Total) * 100;
+												%>
+												<div class="card text-white bg-dark rounded" class="w-25">
+												<img class="card-img" src="<%= users[i]['Prof'] %>" alt="Card image cap">
+												<div class="card-body">
+													<h5 class="card-title"><%= users[i]['username'] %></h5>
+													<p class="card-text"><%= users[i]['biography'] %></p>
+													<% 
+														var sexuality = "";
+														if (users[i]['sexuality'] === "1")
+															sexuality = "Bisexual";
+														if (users[i]['sexuality'] === "2")
+															sexuality = "Heterosexual";
+														if (users[i]['sexuality'] === "3")
+															sexuality = "Homosexual";
+														
+														var sex = "";
+														if (users[i]['sex'] === "1")
+															sex = "Female";
+														if (users[i]['sex'] === "2")
+															sex = "Male";
+														if (users[i]['sex'] === "3")
+															sex = "Other";
+													%>
+													<p class="card-text">Sexuality :: <%= sexuality %></p>
+													<p class="card-text">Gender :: <%= sex %></p>
+													<p class="card-text">Distance from you :: <%= d.toFixedDown(0) %> KM away</p>
+													<p class="card-text">Possible match of :: <%= percent.toFixedDown(0) %> %</p>
+													<a href="/view/<%= users[i]['_id'] %>" class="btn btn-primary">View</a>
+													<a href="/like/<%= users[i]['_id'] %>" class="btn btn-primary">Like</a>
+													<a href="/block/<%= users[i]['_id'] %>" class="btn btn-warning">Block</a>
+													<a href="/report/<%= users[i]['_id'] %>" class="btn btn-danger">Fake</a>
+												</div>
+											</div>
+											<hr>
+											<%
+											} 
+										}
+									}
+								}
+							}	
+							%>
+							<hr>
+							<!--End of Cards-->
+						</div>
+					</div>
+					<% } %>
+					<hr>
+    </div>
+</main>
+
+<footer>
+    <% include ../partials/footer %>
+</footer>
+
+</body>
+</html>

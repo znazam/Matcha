@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<% include ../partials/head %>
+<script defer src="https://use.fontawesome.com/releases/v5.5.0/js/all.js" integrity="sha384-GqVMZRt5Gn7tB9D9q7ONtcp4gtHIUEW/yG7h98J7IpE3kpi+srfFyyB/04OV6pG0" crossorigin="anonymous"></script>
+</head>
+<body class="container">
+	<header>
+		<% include ../partials/header %>
+	</header>
+	<% 
+	if (req_user) {
+		var username = req_user['username'] === null ? 'You\'re in dire need of an username' : req_user['username'];
+		var email = req_user['email'];
+		var up = JSON.parse(JSON.stringify(req_user['picture']));
+		var img1 = up['Picture1'];
+		var img2 = up['Picture2'];
+		var img3 = up['Picture3'];
+		var img4 = up['Picture4'];
+		var img5 = up['Picture5'];
+		var prof = req_user['Prof'];
+		var subscription = req_user['email_subscription'];
+		var biography = req_user['biography'];
+		var fame = req_user['fame'];
+		var age = req_user['age'];
+		var email = req_user['email'];
+		var userType = req_user['type'];
+		var Sexuality = req_user['sexuality'];
+		var Gender = req_user['sex'];
+		var firstname = req_user['firstname'] === null ? 'You\'re in dire need of a firstname' : req_user['firstname'];
+		var lastname = req_user['surname'] === null ? 'You\'re in dire need of a lastname' : req_user['surname'];
+		var tags = req_user['Tag'];
+		var id = req_user['_id'];		
+		var views = req_user['views'];
+		var lastTime = req_user['lastTime'];
+		var date = new Date();
+		var acAge = req_user['actualage']
+		var mydate = new Date(age);
+		var myAge = date.getFullYear() - mydate.getFullYear();
+		var tot = (views / highestView) * 5;
+	}
+	%>
+	<main>
+		<% if (myAge > 17) { %>
+		<div class="container bg-light rounded-bottom mh-100 page">
+			<hr>
+			<div class="row">
+				<h3>Profile Page of "</h3>
+					<div class="control-group">
+						<h3 for="name" class="username-label edit-label" data-toggle="tooltip" data-placement="right" title="Click here to change your username!"><%= username %></h3>
+					</div>
+				<h3>"</h3>
+			</div>
+		</br>
+		<p>
+			<label class="email-label edit-label" data-toggle="tooltip" data-placement="right" title="Click here to change your email!">Generated account :: <%= email %></label>		
+			<!-- <input type="text" class="email-edit-input w-50" style="display: none;" value="<%=email%>"> -->
+		</p>
+			<div class="row w-100">
+				<%
+					let found = false;
+					for (let like of user.likes) {
+						if (like == id) {
+							found = true;
+							break;
+						}
+					}
+					if (found)
+					{
+						%>
+						<a href="/unlike/<%= id %>" class="btn btn-primary">unLike</a>
+						<%
+					}
+					else
+					{
+						%>
+						<a href="/like/<%= id %>" class="btn btn-primary">Like</a>
+						<%
+					} %>
+				<!-- <a href="/unlike/<%= id %>" class="btn btn-primary">unLike</a>
+				<a href="/like/<%= id %>" class="btn btn-primary">Like</a> -->
+				<a href="/block/<%= id %>" class="btn btn-warning">block</a>
+				<a href="/report/<%= id %>" class="btn btn-danger">Report</a>
+			</div>
+			<hr>
+		<!--TEMPLATE-->
+		<div class="row">
+			<div class="col-lg-4">
+				<div class="column">
+					<div class="container-img pic mx-auto w-100">
+						<img src="<%= prof %>" alt="Prof Pic" class="img-thumbnail w-100">
+					</div>
+					<hr>
+					<div class="d-flex justify-content-center flex-row mt-auto">
+						<%
+							if (tot >= 0)
+							{ %>
+								<span id="fameRating" class="fas fa-star"></span>
+							<%}else
+							{%>
+								<span id="fameRating" class="far fa-star"></span>
+							<%}
+						
+							if (tot >= 1)
+							{%>
+								<span id="fameRating" class="fas fa-star"></span>
+							<%}else
+							{%>
+								<span id="fameRating" class="far fa-star"></span>
+							<%}
+						
+							if (tot >= 2)
+							{%>
+								<span id="fameRating" class="fas fa-star"></span>
+							<%}else
+							{%>
+								<span id="fameRating" class="far fa-star"></span>
+							<%}
+						
+							if (tot >= 3)
+							{%>
+								<span id="fameRating" class="fas fa-star"></span>
+							<%}else
+							{%>
+								<span id="fameRating" class="far fa-star"></span>
+							<%}
+						
+							if (tot >= 4)
+							{%>
+								<span id="fameRating" class="fas fa-star"></span>
+							<%}else
+							{%>
+								<span id="fameRating" class="far fa-star"></span>
+							<%}%>
+						
+					</div>
+					<div class="form-group">
+					<label for="biography">About me</label>
+					<div id="biography"><%= biography %></div>
+				</div>
+			</div>
+			<hr>
+			</div>
+			<div class="col-lg-8">
+				<div class="coloumn">
+					<p>
+					Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;<label class="firstname-label edit-label"><%= firstname %></label>&nbsp;</p>
+					<p>
+					Surname&nbsp;::
+						&nbsp;<label class="lastname-label edit-label"><%= lastname %></label>&nbsp;</p>
+					<div class="coloumn">
+						<p class="age">Age&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:: &nbsp;<label class="email-label edit-label"><%= myAge %></label>&nbsp;</p>
+						<!--Sexuality-->
+						<div class="input-group mb-3">
+						<label class="" for="">Sexuality&nbsp;::&nbsp; </label>
+						<% if (Sexuality === '1') { %>
+						&nbsp;<label class="email-label edit-label">Bisexual</label>&nbsp;
+						<% }
+						if (Sexuality === '2') { %>
+						&nbsp;<label class="email-label edit-label">Heterosexual</label>&nbsp;
+						<% } 
+						if (Sexuality === '3') { %>
+						&nbsp;<label class="email-label edit-label">Homosexual</label>&nbsp;
+						<% } %>
+						</div>
+						<!--Gender-->
+						<div class="input-group mb-3">
+						<label class="" for="">Gender&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;</label>
+						<% if (Gender === '1') { %>
+						&nbsp;<label class="email-label edit-label">Female</label>&nbsp;
+						<% }
+						if (Gender === '2') { %>
+						&nbsp;<label class="email-label edit-label">Male</label>&nbsp;
+						<% }
+						if (Gender === '3') { %>
+						&nbsp;<label class="email-label edit-label">Other</label>&nbsp;
+						<% } %>
+						</div>
+						<p class="age">Views:: <%= views %></p>
+						<p class="age">Last Online:: <%= lastTime %></p>
+						</div>
+						</div>
+						<div class="d-flex flex-column">
+			<div class="row pic-row">
+				<div class="container-img pic mx-auto my-auto col-md-6">
+					<img src="<%= img2 %>" alt="Prof Pic" class="img-thumbnail w-100">
+				</div>
+				<div class="container-img pic mx-auto my-auto col-md-6">
+					<img src="<%= img3 %>" alt="Prof Pic" class="img-thumbnail w-100">
+				</div>
+			</div>
+			<div class="row pic-row">
+				<div class="container-img pic mx-auto my-auto col-md-6">
+					<img src="<%= img4 %>" alt="Prof Pic" class="img-thumbnail w-100">
+				</div>
+				<div class="container-img pic mx-auto my-auto col-md-6">
+					<img src="<%= img5 %>" alt="Prof Pic" class="img-thumbnail w-100">
+				</div>
+			</div>
+		</div>
+		<hr>
+			<hr>
+			<div class="grid">
+				<div id='likes-list' class="mx-auto">
+				<% for (var i = 0; i < tags.length; i++) { %>
+					<label class="edit-label"><%=tags[i] %></label>
+				<% } %>
+				</div>
+			</div>
+			<hr>
+		</div>
+		</div>
+		</div>
+		<% } %>
+		<!--End Template-->
+	</main>
+		<% include ../partials/error %>
+	<footer>
+		<% include ../partials/footer %>
+	</footer>
+</body>
+</html>
